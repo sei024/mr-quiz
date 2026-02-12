@@ -120,14 +120,20 @@ jobs:
       - name: Post quiz as comment
         if: steps.diff.outputs.skip == 'false' && steps.quiz.outputs.quiz_id != '' && steps.quiz.outputs.quiz_id != 'null'
         uses: actions/github-script@v7
+        env:
+          QUIZ_ID: ${{ steps.quiz.outputs.quiz_id }}
+          QUESTION: ${{ steps.quiz.outputs.question }}
+          CATEGORY: ${{ steps.quiz.outputs.category }}
+          DIFFICULTY: ${{ steps.quiz.outputs.difficulty }}
+          OPTIONS: ${{ steps.quiz.outputs.options }}
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
-            const quizId = '${{ steps.quiz.outputs.quiz_id }}';
-            const question = `${{ steps.quiz.outputs.question }}`;
-            const category = '${{ steps.quiz.outputs.category }}';
-            const difficulty = '${{ steps.quiz.outputs.difficulty }}';
-            const options = `${{ steps.quiz.outputs.options }}`;
+            const quizId = process.env.QUIZ_ID;
+            const question = process.env.QUESTION;
+            const category = process.env.CATEGORY;
+            const difficulty = process.env.DIFFICULTY;
+            const options = process.env.OPTIONS;
 
             const difficultyEmoji = {
               'easy': '🟢',
