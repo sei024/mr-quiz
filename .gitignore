@@ -10,6 +10,9 @@ build/
 .env.*
 !.env.example
 
+# MCP configuration (may contain sensitive keys)
+.mcp.json
+
 # IDE
 .vscode/
 .idea/
