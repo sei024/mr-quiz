@@ -136,6 +136,10 @@ export async function generateQuizFromDiff(
 
 	const model = getVertexAIClient().getGenerativeModel({
 		model: MODEL_NAME,
+		generationConfig: {
+			responseMimeType: "application/json",
+			responseSchema: quizResponseSchema,
+		},
 	});
 
 	const prompt = `${QUIZ_SYSTEM_PROMPT}
@@ -145,7 +149,9 @@ export async function generateQuizFromDiff(
 ${diff}
 \`\`\`
 
-上記のdiffを分析し、以下のJSON形式で1つのクイズを作成してください:
+Analyze the diff above and create one quiz in the following JSON format.
+Write questionText, options, and explanation in Japanese.
+Use exact English values for category and difficulty as shown below.
 
 {
   "questionText": "問題文",
@@ -157,7 +163,7 @@ ${diff}
   "diffReference": "該当する差分の参照（任意）"
 }
 
-JSONのみを出力してください（説明文などは不要です）。`;
+Output only the JSON (no explanatory text).`;
 
 	logger.info("Generating quiz from diff", {
 		diffLength: diff.length,
