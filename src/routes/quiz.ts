@@ -38,7 +38,7 @@ const GenerateQuizRequestSchema = z.object({
 	number: z.number().int().positive(),
 	accountId: z.string().min(1),
 	title: z.string().min(1).optional().default("Untitled"),
-	diff: z.string().min(1),
+	diff: z.string().min(1).max(500_000),
 	filesChanged: z.array(z.string()).optional(),
 });
 

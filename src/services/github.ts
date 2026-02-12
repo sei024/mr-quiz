@@ -153,6 +153,24 @@ export async function updatePRComment(
 }
 
 /**
+ * Sanitize AI-generated text to prevent markdown injection.
+ * Removes hyperlinks, HTML tags, and image embeds that could be used for phishing.
+ */
+export function sanitizeAIOutput(text: string): string {
+	return (
+		text
+			// Remove markdown links [text](url) → text
+			.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+			// Remove raw URLs (http/https)
+			.replace(/https?:\/\/\S+/g, "[URL removed]")
+			// Remove HTML tags
+			.replace(/<[^>]+>/g, "")
+			// Remove markdown image embeds ![alt](url)
+			.replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+	);
+}
+
+/**
  * クイズコメントをフォーマット
  * @param quizId クイズID
  * @param questionText 問題文
@@ -172,7 +190,9 @@ export function formatQuizComment(
 	quizUrl: string,
 	showProfileGuide = false,
 ): string {
-	const optionsList = options.map((opt, i) => `${i + 1}. ${opt}`).join("\n");
+	const safeQuestionText = sanitizeAIOutput(questionText);
+	const safeOptions = options.map((opt) => sanitizeAIOutput(opt));
+	const optionsList = safeOptions.map((opt, i) => `${i + 1}. ${opt}`).join("\n");
 
 	// プロファイルガイドセクション
 	const profileGuideSection = showProfileGuide
@@ -213,7 +233,7 @@ export function formatQuizComment(
 **難易度:** ${difficulty}
 
 **問題:**
-${questionText}
+${safeQuestionText}
 
 **選択肢:**
 ${optionsList}
