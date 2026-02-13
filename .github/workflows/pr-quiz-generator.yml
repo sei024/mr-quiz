@@ -94,7 +94,7 @@ jobs:
           jq -Rs . /tmp/diff.txt > /tmp/diff.json
 
           # jqでJSON安全にペイロードを構築（diffはファイルから読み込み、引数長制限を回避）
-          PAYLOAD=$(jq -n \
+          jq -n \
             --arg platform "github" \
             --arg owner "$REPO_OWNER" \
             --arg repo "$REPO_NAME" \
@@ -103,13 +103,14 @@ jobs:
             --arg title "$PR_TITLE" \
             --slurpfile diff /tmp/diff.json \
             --argjson filesChanged "$FILES_CHANGED" \
-            '{platform: $platform, owner: $owner, repo: $repo, number: $number, accountId: $accountId, title: $title, diff: $diff[0], filesChanged: $filesChanged}')
+            '{platform: $platform, owner: $owner, repo: $repo, number: $number, accountId: $accountId, title: $title, diff: $diff[0], filesChanged: $filesChanged}' \
+            > /tmp/payload.json
 
-          # IAM認証付きでAPIリクエストを送信
+          # IAM認証付きでAPIリクエストを送信（ペイロードはファイルから読み込み、引数長制限を回避）
           RESPONSE=$(curl -s -X POST "$CLOUD_RUN_URL/api/quiz/generate" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $ID_TOKEN" \
-            -d "$PAYLOAD")
+            -d @/tmp/payload.json)
 
           echo "response=$RESPONSE" >> $GITHUB_OUTPUT
 
