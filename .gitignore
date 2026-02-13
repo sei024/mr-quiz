@@ -36,3 +36,7 @@ firebase-debug.log
 # Temporary files
 *.tmp
 *.swp
+
+# MCP server
+mcp/node_modules/
+mcp/dist/

@@ -4,6 +4,7 @@
   "description": "PR/MR作成時にAIがクイズを自動生成するBot",
   "main": "dist/index.js",
   "type": "module",
+  "workspaces": ["mcp"],
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
@@ -14,7 +15,10 @@
     "lint:fix": "biome check --write src",
     "format": "biome format --write src",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "build:mcp": "npm -w mr-quiz-mcp run build",
+    "dev:mcp": "npm -w mr-quiz-mcp run dev",
+    "typecheck:all": "tsc --noEmit && npm -w mr-quiz-mcp run typecheck"
   },
   "dependencies": {
     "@google-cloud/firestore": "^8.2.0",
