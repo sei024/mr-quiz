@@ -90,26 +90,27 @@ jobs:
           ACCOUNT_ID: ${{ github.event.pull_request.user.login }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          # diffをJSON形式で準備
-          DIFF_CONTENT=$(cat /tmp/diff.txt | jq -Rs .)
+          # diffをJSONエスケープしてファイルに保存
+          jq -Rs . /tmp/diff.txt > /tmp/diff.json
 
-          # jqでJSON安全にペイロードを構築
-          PAYLOAD=$(jq -n \
+          # jqでJSON安全にペイロードを構築（diffはファイルから読み込み、引数長制限を回避）
+          jq -n \
             --arg platform "github" \
             --arg owner "$REPO_OWNER" \
             --arg repo "$REPO_NAME" \
             --argjson number "$PR_NUMBER" \
             --arg accountId "$ACCOUNT_ID" \
             --arg title "$PR_TITLE" \
-            --argjson diff "$DIFF_CONTENT" \
+            --slurpfile diff /tmp/diff.json \
             --argjson filesChanged "$FILES_CHANGED" \
-            '{platform: $platform, owner: $owner, repo: $repo, number: $number, accountId: $accountId, title: $title, diff: $diff, filesChanged: $filesChanged}')
+            '{platform: $platform, owner: $owner, repo: $repo, number: $number, accountId: $accountId, title: $title, diff: $diff[0], filesChanged: $filesChanged}' \
+            > /tmp/payload.json
 
-          # IAM認証付きでAPIリクエストを送信
+          # IAM認証付きでAPIリクエストを送信（ペイロードはファイルから読み込み、引数長制限を回避）
           RESPONSE=$(curl -s -X POST "$CLOUD_RUN_URL/api/quiz/generate" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $ID_TOKEN" \
-            -d "$PAYLOAD")
+            -d @/tmp/payload.json)
 
           echo "response=$RESPONSE" >> $GITHUB_OUTPUT
 

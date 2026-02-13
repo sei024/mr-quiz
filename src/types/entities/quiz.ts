@@ -40,7 +40,7 @@ export const QuizSchema = z.object({
 	explanation: z.string().min(1),
 
 	/** 対象diff箇所 */
-	diffReference: z.string().optional(),
+	diffReference: z.string().nullish(),
 
 	/** ステータス */
 	status: QuizStatusSchema,
@@ -59,7 +59,7 @@ export const GeneratedQuizSchema = z.object({
 	options: z.array(z.string().min(1)).length(4),
 	correctAnswerIndex: z.number().int().min(0).max(3),
 	explanation: z.string().min(1),
-	diffReference: z.string().optional(),
+	diffReference: z.string().nullish(),
 });
 
 export type GeneratedQuiz = z.infer<typeof GeneratedQuizSchema>;
